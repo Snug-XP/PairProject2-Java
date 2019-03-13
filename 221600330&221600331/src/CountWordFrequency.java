@@ -5,15 +5,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
 
-public class countWordFrequency {
-	
+public class CountWordFrequency {
+
 	/*
-	 * 按权重统计文件的单词(或词组)词频(0表示属于 Title、Abstract 的单词(或词组)权重相同均为 1;
-	 * 1 表示属于 Title 的单词(或词组)权重为10，属于Abstract 单词(或词组)权重为1)
-	 * 输入：初步统计的单词(或词组)和词频的Map、数字选项
+	 * 按权重统计文件的单词(或词组)词频(0表示属于 Title、Abstract 的单词(或词组)权重相同均为 1; 1 表示属于 Title
+	 * 的单词(或词组)权重为10，属于Abstract 单词(或词组)权重为1) 输入：初步统计的单词(或词组)和词频的Map、数字选项
 	 * 输出：按权重统计的单词(或词组)和词频的Map
 	 */
-	public static Map<String, String> count_Word_Frequency(String input_file_path, Map<String, String> wordsMap, int choose) {
+	public static Map<String, String> count_Word_Frequency(String input_file_path, Map<String, String> wordsMap,
+			int choose) {
 
 		try {
 			File input_file = new File(input_file_path);
@@ -23,47 +23,51 @@ public class countWordFrequency {
 
 			if (input_file.isFile() && input_file.exists())// 判断文件是否存在
 			{
-				reader = new InputStreamReader(new FileInputStream(input_file));
-				bufferedReader = new BufferedReader(reader);
+				
 
-				// 先去除wordsMap初步统计中“title: ”和“abstract: ”所占用的词频
-				while ((str = bufferedReader.readLine()) != null) {
-					str = str.toLowerCase();
-					if (str.contains("title: ")) {
-						// title的词频减一
-						int value = Integer.parseInt(wordsMap.get("title"));
-						value--;
-						wordsMap.put("title", value + "");
+				if (wordsMap.containsKey("title"))// 如果是单词的Map
+				{
+					// 先去除wordsMap初步统计中“title: ”和“abstract: ”所占用的词频
+					reader = new InputStreamReader(new FileInputStream(input_file));
+					bufferedReader = new BufferedReader(reader);
+					while ((str = bufferedReader.readLine()) != null) {
+						str = str.toLowerCase();
+						if (str.contains("title: ")) {
+							// title的词频减一
+							int value = Integer.parseInt(wordsMap.get("title"));
+							value--;
+							wordsMap.put("title", value + "");
 
-						// 总单词个数减一
-						int n = Integer.parseInt(wordsMap.get("count_words"));
-						n--;
-						wordsMap.put("count_words", n + "");
-					}
-					if (str.contains("abstract: ")) {
-						// abstract的词频减一
-						int value = Integer.parseInt(wordsMap.get("abstract"));
-						value--;
-						wordsMap.put("abstract", value + "");
+							// 总单词个数减一
+							int n = Integer.parseInt(wordsMap.get("count_words"));
+							n--;
+							wordsMap.put("count_words", n + "");
+						}
+						if (str.contains("abstract: ")) {
+							// abstract的词频减一
+							int value = Integer.parseInt(wordsMap.get("abstract"));
+							value--;
+							wordsMap.put("abstract", value + "");
 
-						// 总单词个数减一
-						int n = Integer.parseInt(wordsMap.get("count_words"));
-						n--;
-						wordsMap.put("count_words", n + "");
+							// 总单词个数减一
+							int n = Integer.parseInt(wordsMap.get("count_words"));
+							n--;
+							wordsMap.put("count_words", n + "");
+						}
 					}
 				}
-				if (wordsMap.get("title").equals("0"))
-					wordsMap.remove("title");
-				if (wordsMap.get("abstract").equals("0"))
-					wordsMap.remove("abstract");
-				
-				
+				// if (wordsMap.get("title").equals("0"))
+				// wordsMap.remove("title");
+				// if (wordsMap.get("abstract").equals("0"))
+				// wordsMap.remove("abstract");
+
 				if (choose == 0) {
 					// 权重1:1
-					reader.close();
 					return wordsMap;
 				} else if (choose == 1) {
 					// 权重10:1
+					reader = new InputStreamReader(new FileInputStream(input_file));
+					bufferedReader = new BufferedReader(reader);
 					while ((str = bufferedReader.readLine()) != null) {
 						str = str.toLowerCase();
 						if (str.contains("title: ")) {
@@ -87,13 +91,12 @@ public class countWordFrequency {
 													}
 												}
 												String temp = str.substring(i, j);// 截取字符串索引号i到j区域（包括i，不包括j）
-												// 词频加9或第一次录入词频10
+												// 词频加9
 												if (wordsMap.containsKey(temp)) {
 													int n = Integer.parseInt(wordsMap.get(temp));
-													n+=9;
+													n += 9;
 													wordsMap.put(temp, n + "");
-												} else
-													wordsMap.put(temp, "10");
+												} 
 												i = j;
 											} else
 												i = i + 3;
@@ -108,7 +111,6 @@ public class countWordFrequency {
 					reader.close();
 					return wordsMap;
 				} else {
-					reader.close();
 					System.out.println("命令错误！！");
 					return null;
 				}
@@ -121,6 +123,20 @@ public class countWordFrequency {
 			e.printStackTrace();
 			return null;
 		}
-
 	}
+	/*
+	 * 从str1中统计str2出现的次数
+	 */
+	public int appear_Number(String str1, String str2) {
+	    int count = 0;
+	    int index = 0;
+	    while ((index = str1.indexOf(str2, index)) != -1) {
+	        index = index + str2.length();
+	        count++;
+	    }
+	    return count;
+	}
+
 }
+
+
