@@ -1,61 +1,80 @@
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 public class Main {
 
 	public static void main(String[] args) {
-		Map<String, String> wordsMap = countPhrase.count_Phrase_frequency("result.txt", 15);//wordCount.count_Words("result.txt");
-		wordsMap = countWordFrequency.count_Word_Frequency("result.txt", wordsMap, 1);
-
-		try {//测试.... 
-			int countWords = Integer.parseInt(wordsMap.get("count_words"));
-
-			File output_file = new File("input.txt");
-			OutputStreamWriter writer;
-			writer = new OutputStreamWriter(new FileOutputStream(output_file));
-			BufferedWriter bufferedWriter = new BufferedWriter(writer);
-			bufferedWriter.write("words: " + countWords + "\r\n");
-			bufferedWriter.flush();
-
-			System.out.println("words: " + countWords);
-
-			if (countWords <= 0) {
-				writer.close();
-				return;
-			}
-
-			int n = 10;
-			while (countWords > 0 && n-- > 0) {
-				String temp = "";
-				int maxNum = -1;
-				Iterator<Map.Entry<String, String>> iterator = wordsMap.entrySet().iterator();
-				while (iterator.hasNext()) {
-					Map.Entry<String, String> entry = iterator.next();
-					if (Integer.parseInt(entry.getValue()) >= maxNum && !entry.getKey().equals("count_words")) {
-						if (Integer.parseInt(entry.getValue()) == maxNum && entry.getKey().compareTo(temp) > 0) {// 相同频率的单词选字典序靠前的单词
-							continue;
-						}
-						temp = entry.getKey();
-						maxNum = Integer.parseInt(entry.getValue());
+		
+		int count_char = 0;
+		int count_rows = 0;
+		int count_words_num = 0;
+		int phraseLength = 0;  //一个词组的包含的单词数
+		boolean is_weight=false;  //是否加权重
+		int numbers=11;
+		
+		//输入与输出地址
+		String in_name = "test.txt";
+		String out_name = "result.txt";
+		for(int i=0;i<args.length;i+=2) {
+			switch(args[i]) {
+				case "-i":
+					
+					in_name=args[i+1];//更改输入文件路径
+					break;
+				case "-o":
+					
+					out_name=args[i+1];//更改输出文件路径
+					break;
+				case "-w":
+					//由输入参数选择权重占比
+					if(Integer.parseInt(args[i+1])==0) {
+						is_weight=false;
+					}else {
+						is_weight=true;
 					}
-				}
-				bufferedWriter.write("<" + temp + ">: " + maxNum + "\r\n");
-				bufferedWriter.flush();
-				System.out.println("<" + temp + ">: " + maxNum);
-
-				wordsMap.remove(temp);
-				countWords = countWords - maxNum;
+					break;
+				case "-m":
+					/*统计文件夹中指定长度的词组的词频
+					 * 出现-m时只统计词组词频
+					 * 未出现-m时只统计单词词频
+					 * */
+					phraseLength=Integer.parseInt(args[i+1]);
+					break;
+				case "-n":
+					/*用户指定输出前number多的单词(词组)与其频数
+					 * 表示输出频数最多的前 [number] 个单词(词组)
+					 * */
+					numbers=Integer.parseInt(args[i+1]);
+					break;
+				default:
+						System.out.println("指令错误！！！");
 			}
-			writer.close();
-		} catch (IOException e) {
-			// TODO 自动生成的 catch 块
-			e.printStackTrace();
 		}
+		
+		Map<String, String> wordsMap;
+		Map<String, String> wordsFrequency;
+
+		String new_file = lib.rewrite_Txt(in_name);
+		
+		count_char = lib.count_Characters(new_file)-1;//统计文件的字符数
+		
+		wordsMap = lib.count_Words(new_file);//从文件提取单词并且统计单词出现次数和单词总数放入Map
+		count_words_num = Integer.parseInt(wordsMap.get("count_words_num"));//统计文件的单词数
+		
+		count_rows = lib.count_Lines(new_file);//统计文件的行数
+		
+		wordsFrequency=lib.count_Word_Frequency(in_name, wordsMap,is_weight);//统计单词的权重词频
+		
+		
+		
+		if( phraseLength > 0 ) {
+			Map<String, String> phraseFrequency = lib.count_Phrase_frequency(in_name, phraseLength, is_weight);//统计词组的权重词频
+			lib.writeToFile(phraseFrequency,count_char,count_words_num,count_rows,out_name,numbers);/*输出至文件中*/
+		}
+		else
+			lib.writeToFile(wordsFrequency,count_char,count_words_num,count_rows,out_name,numbers);/*输出至文件中*/
 	}
+	
+	
+
 
 }
